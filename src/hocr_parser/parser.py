@@ -9,7 +9,7 @@ class HOCRElement:
 
     __metaclass__ = ABCMeta
 
-    COORDINATES_PATTERN = re.compile("bbox\s(-?[0-9]+)\s(-?[0-9]+)\s(-?[0-9]+)\s(-?[0-9]+)")
+    COORDINATES_PATTERN = re.compile("[x_b]*bbox[es]*\s(-?[0-9]+)\s(-?[0-9]+)\s(-?[0-9]+)\s(-?[0-9]+)")
 
     def __init__(self, hocr_html, parent, next_tag, next_attribute, next_class):
         self.__coordinates = (0, 0, 0, 0)
@@ -208,12 +208,34 @@ class Word(HOCRElement):
     HOCR_WORD_TAG = "ocrx_word"
 
     def __init__(self, parent, hocr_html):
-        super(Word, self).__init__(hocr_html, parent, None, None, None)
+        super(Word, self).__init__(hocr_html, parent, 'span', Character.HOCR_CHAR_TAG, Character)
+
+    @property
+    def chars(self):
+        return self._elements
+
+    @property
+    def nchars(self):
+        return len(self._elements)
 
     @property
     def ocr_text(self):
         word = self._hocr_html.string
         if word is not None:
             return word
+        else:
+            return ""
+
+class Character(HOCRElement):
+    HOCR_CHAR_TAG = "ocrx_cinfo"
+
+    def __init__(self, parent, hocr_html):
+        super(Character, self).__init__(hocr_html, parent, None, None, None)
+
+    @property
+    def ocr_text(self):
+        char = self._hocr_html.string
+        if char is not None:
+            return char
         else:
             return ""
